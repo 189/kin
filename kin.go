@@ -14,7 +14,7 @@ type Engine struct {
 
 // 构造函数
 func New() *Engine {
-	return &Engine{&router{}}
+	return &Engine{router: NewRouter()}
 }
 
 // 注册Get路由
