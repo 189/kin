@@ -23,6 +23,7 @@ func NewContext(writer http.ResponseWriter, req *http.Request) *Context {
 	}
 }
 
+
 // 请求地址中获取参数
 func (c *Context) Query(key string) string {
 	return c.Req.URL.Query().Get(key)

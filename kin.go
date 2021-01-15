@@ -22,6 +22,7 @@ func (e *Engine) Get(pattern string, handle HandleFunc)  {
 	e.router.AddRoute("get", pattern, handle)
 }
 
+
 // 注册Post路由
 func (e *Engine) Post(pattern string, handle HandleFunc)  {
 	e.router.AddRoute("post", pattern, handle)

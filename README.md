@@ -1,7 +1,7 @@
 # Kin
 A simple web framework written in golang.
 
-# Intall
+# Install
 
 `go get git@github.com:189/kin.git`
 
