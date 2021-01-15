@@ -1,6 +1,9 @@
 package kin
 
-import "fmt"
+import (
+	"net/http"
+	"strings"
+)
 
 type router struct {
 	routes map[string]HandleFunc
@@ -14,16 +17,16 @@ func NewRouter() *router {
 
 // 注册路由
 func (r *router) AddRoute(method string, pattern string, handle HandleFunc) {
-	r.routes[method + "-" + pattern] = handle
+	r.routes[strings.ToLower(method + "-" + pattern)] = handle
 }
 
 // 根据路由地址，找路由处理函数执行
 func (r *router) Handle(context *Context) {
-	key := context.Method + "-" + context.Path
+	key := strings.ToLower(context.Method + "-" + context.Path)
 	if route, ok := r.routes[key]; ok  {
 		route(context)
 	} else {
-		fmt.Println("no match route")
+		http.NotFound(context.Writer, context.Req)
 	}
 }
 
