@@ -1,8 +1,11 @@
-## kin
-A simple web framework writen in golang.
+# Kin
+A simple web framework written in golang.
 
+# Intall
 
-## Usage
+`go get git@github.com:189/kin.git`
+
+# Usage
 
 ```
 func main() {
