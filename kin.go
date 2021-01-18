@@ -19,13 +19,13 @@ func New() *Engine {
 
 // 注册Get路由
 func (e *Engine) Get(pattern string, handle HandleFunc)  {
-	e.router.AddRoute("get", pattern, handle)
+	e.router.addRoute("get", pattern, handle)
 }
 
 
 // 注册Post路由
 func (e *Engine) Post(pattern string, handle HandleFunc)  {
-	e.router.AddRoute("post", pattern, handle)
+	e.router.addRoute("post", pattern, handle)
 }
 
 // 处理每一次请求
