@@ -56,7 +56,7 @@ func (c *Context) SetHeader(key string, value string) {
 func (c *Context) Json(code int, response interface{}) {
 	c.SetHeader("Content-Type", "application/json")
 	c.SetStatus(code)
-	encoder := json.NewEncoder(c.Writer);
+	encoder := json.NewEncoder(c.Writer)
 	if err := encoder.Encode(response); err != nil {
 		http.Error(c.Writer, err.Error(), 500)
 	}
