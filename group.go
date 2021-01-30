@@ -36,4 +36,12 @@ func (g *GroupRouter) Post(pattern string, handle HandleFunc) {
 
 
 
+// 往中间件数组里 push 中间件
+func (g *GroupRouter) Use(middleware ...HandleFunc) {
+	g.middleWares = append(g.middleWares, middleware...)
+}
+
+
+
+
 

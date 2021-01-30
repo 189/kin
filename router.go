@@ -86,10 +86,12 @@ func (r *router) Handle(context *Context) {
 	if n != nil {
 		key := strings.ToLower(context.Method + "-" + n.pattern)
 		context.Params = params
-		r.routes[key](context)
+		context.handles = append(context.handles, r.routes[key])
+		//r.routes[key](context)
 	} else {
 		http.NotFound(context.Writer, context.Req)
 	}
+	context.Next()
 }
 
 

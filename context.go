@@ -13,6 +13,8 @@ type Context struct {
 	Method string
 	StatusCode int
 	Params map[string]string
+	handles []HandleFunc
+	index int
 }
 
 func NewContext(writer http.ResponseWriter, req *http.Request) *Context {
@@ -21,9 +23,10 @@ func NewContext(writer http.ResponseWriter, req *http.Request) *Context {
 		Req: req,
 		Path: req.URL.Path,
 		Method: req.Method,
+		handles: []HandleFunc{},
+		index: -1,
 	}
 }
-
 
 // 请求地址中获取参数
 func (c *Context) Query(key string) string {
@@ -80,6 +83,15 @@ func (c *Context) String(status int, format string, response...interface{}) {
 	c.SetHeader("Content-Type", "text/plain")
 	c.SetStatus(200);
 	c.Writer.Write([]byte(fmt.Sprintf(format, response...)));
+}
+
+// 洋葱顺序 执行中间件, 直至中间件栈 执行完毕
+func (c *Context) Next()  {
+	total := len(c.handles)
+	c.index++
+	for ; c.index < total; c.index++ {
+		c.handles[c.index](c)
+	}
 }
 
 
