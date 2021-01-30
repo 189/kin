@@ -86,6 +86,7 @@ func (r *router) Handle(context *Context) {
 	if n != nil {
 		key := strings.ToLower(context.Method + "-" + n.pattern)
 		context.Params = params
+		// 将 路由处理函数，也放到 Handles 中，最后由 Next方法遍历执行
 		context.handles = append(context.handles, r.routes[key])
 		//r.routes[key](context)
 	} else {
