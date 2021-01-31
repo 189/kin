@@ -6,6 +6,9 @@ import (
 	"net/http"
 )
 
+
+type AnyMap map[string]interface{}
+
 type Context struct {
 	Writer http.ResponseWriter
 	Req *http.Request
@@ -92,6 +95,12 @@ func (c *Context) Next()  {
 	for ; c.index < total; c.index++ {
 		c.handles[c.index](c)
 	}
+}
+
+func (c *Context) Fail(code int, err string) {
+	c.Json(code, AnyMap{
+		"message": err,
+	})
 }
 
 
