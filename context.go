@@ -18,6 +18,7 @@ type Context struct {
 	Params map[string]string
 	handles []HandleFunc
 	index int
+	engine *Engine
 }
 
 func NewContext(writer http.ResponseWriter, req *http.Request) *Context {
@@ -69,10 +70,13 @@ func (c *Context) Json(code int, response interface{}) {
 }
 
 // HTML 响应
-func (c *Context) Html(code int, html string)  {
+func (c *Context) Html(code int, filename string, data AnyMap)  {
 	c.SetStatus(code)
 	c.SetHeader("Content-Type", "text/html")
-	c.Writer.Write([]byte(html))
+	//c.Writer.Write([]byte(html))
+	if err := c.engine.templates.ExecuteTemplate(c.Writer, filename, data); err != nil {
+		c.Fail(http.StatusNotImplemented, err.Error())
+	}
 }
 
 // 数据响应
@@ -84,8 +88,8 @@ func (c *Context) Bytes(code int, data []byte) {
 // 字符串响应
 func (c *Context) String(status int, format string, response...interface{}) {
 	c.SetHeader("Content-Type", "text/plain")
-	c.SetStatus(200);
-	c.Writer.Write([]byte(fmt.Sprintf(format, response...)));
+	c.SetStatus(200)
+	c.Writer.Write([]byte(fmt.Sprintf(format, response...)))
 }
 
 // 洋葱顺序 执行中间件, 直至中间件栈 执行完毕

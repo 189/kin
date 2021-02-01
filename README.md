@@ -8,50 +8,59 @@ A simple web framework written in golang.
 # Usage
 
 ```
+func formatTime(t time.Time) string {
+	year, month, day := t.Date()
+	return fmt.Sprintf("%d-%02d-%02d", year, month, day)
+}
+
 func main() {
 	r := kin.New()
 
-	// 应用中间件
+	// 应用内置的 logger 中间件
 	r.Use(kin.GetLogger())
-	// 错误恢复
+	// 应用内置recovery中间件
 	r.Use(kin.Recovery())
-	// 托管静态资源目录
+	// 静态资源托管 /public/xx.png 请求会映射成 ./assets/xx.png,
 	r.Static("/public", "./assets")
 
-	// Get 路由注册
+	// 设置模板目录
+	r.SetView("views/*")
+	// 设置模板预处理函数，可在模板文件内部调用
+	r.SetFuncMap(template.FuncMap{
+		"formatTime": formatTime,
+	})
+
+	// 注册Get路由 跟路由
 	r.Get("/", func(context *kin.Context) {
-		arr := []int{1, 2,3 ,4}
-		context.String(http.StatusOK, "%v", arr[10])
+		context.String(http.StatusOK, "Server Wake Up")
 	})
-
+	// 响应 Html
+	// curl "http://localhost:8082/users"
 	r.Get("/users", func(context *kin.Context) {
-		context.Html(http.StatusOK, "<div>users list</div>")
-	})
-
-	r.Get("/person", func(context *kin.Context){
-		context.Json(http.StatusOK, &Mock{
-			Name: "lily",
-			Age: 22,
+		context.Html(http.StatusOK, "users.html", kin.AnyMap{
+			"title": "用户详情",
+			"users": [2]*kin.AnyMap{
+				&kin.AnyMap{
+					"name": "Tom",
+					"age":22,
+				},
+				&kin.AnyMap{
+					"name": "HanMeiMei",
+					"age":23,
+				},
+			},
 		})
 	})
 
-	r.Post("/post", func(context *kin.Context) {
-		data := context.PostValue("name")
-		fmt.Printf("%+v", data)
-		j, _ := json.Marshal(data)
-		context.Json(http.StatusOK, string(j))
-	})
-
-	// 应用路由组
+	// 路由组 & 路由参数 & json 响应
+	// curl "http://localhost:8082/user/tom/detail"
 	userGroup := r.Group("/user")
 	userGroup.Get("/:name/detail", func(context *kin.Context) {
-		context.Html(http.StatusOK, fmt.Sprintf("<span>name is %s</span>", context.Params))
-	})
-	userGroup.Get("/:name/transaction", func(context *kin.Context) {
-		context.Html(http.StatusOK, "<span>html transaction response</span>")
+		context.Json(http.StatusOK, kin.AnyMap{
+			"name": context.Params["name"],
+		})
 	})
 
-	// 指定端口运行
 	r.Run("8082")
 }
 ```

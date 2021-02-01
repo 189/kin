@@ -2,6 +2,7 @@ package kin
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"strings"
 )
@@ -16,6 +17,10 @@ type Engine struct {
 	*GroupRouter
 	// 存储所有路由组
 	groups []*GroupRouter
+	// 模板渲染内容处理
+	funcMap template.FuncMap
+	// 模板
+	templates *template.Template
 }
 
 // 构造函数
@@ -40,9 +45,20 @@ func (e * Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	// 生成上下文对象
 	context := NewContext(w, req)
+	context.engine = e
 	context.handles = middlewares
 	// 根据路由规则 匹配对应的回调
 	e.router.Handle(context)
+}
+
+func (e *Engine) SetFuncMap(funcmap template.FuncMap)  {
+	e.funcMap = funcmap
+}
+
+// 设置 所有可用的模板
+func (e *Engine) SetView(pattern string) *template.Template {
+	e.templates = template.Must(template.New("").Funcs(e.funcMap).ParseGlob(pattern))
+	return e.templates
 }
 
 // 启动服务
