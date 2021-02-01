@@ -1,5 +1,9 @@
 package kin
 
+import (
+	"net/http"
+	"path"
+)
 
 type GroupRouter struct {
 	// 保持访问 engine 的能力， 因为engine 能调度 router
@@ -40,6 +44,28 @@ func (g *GroupRouter) Post(pattern string, handle HandleFunc) {
 func (g *GroupRouter) Use(middleware ...HandleFunc) {
 	g.middleWares = append(g.middleWares, middleware...)
 }
+
+
+func (g *GroupRouter) createFileServer(virtualPath string, fs http.FileSystem) HandleFunc  {
+	absolutePath := path.Join(g.prefix, virtualPath)
+	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs))
+	return func(context *Context) {
+		// 判断文件是否存在
+		filepath := context.Params["filepath"]
+		if _, err := fs.Open(filepath); err != nil {
+			context.SetStatus(http.StatusNotFound)
+		}
+		fileServer.ServeHTTP(context.Writer, context.Req)
+	}
+}
+
+// 静态资源托管， 将virtualPath 的地址请求，转发到 root 下文件系统服务上
+func (g *GroupRouter) Static(virtualPath string, root string) {
+	handler :=  g.createFileServer(virtualPath, http.Dir(root))
+	pattern := path.Join(virtualPath, "/*filepath")
+	g.Get(pattern, handler)
+}
+
 
 
 

@@ -9,30 +9,49 @@ A simple web framework written in golang.
 
 ```
 func main() {
-    r := kin.New()
-    r.Get("/", func(context *kin.Context) {
-        context.String(200, "good")
-    })
-    r.Get("/json", func(context *kin.Context) {
-        mock := &MockJson{
-            Name: "lily",
-            Age: 22,
-        }
-        data, _ := json.Marshal(mock)
-        context.Json(200, string(data))
-    })
-    
-    r.Get("/html", func(context *kin.Context){
-        context.Html(200, "<div>nice html response</div>")
-    })
-    
-    r.Post("/post", func(context *kin.Context) {
-        data := context.PostValue("name")
-        fmt.Printf("%+v", data)
-        j, _ := json.Marshal(data)
-        context.Json(200, string(j))
-    })
-    
-    r.Run("8082")
+	r := kin.New()
+
+	// 应用中间件
+	r.Use(kin.GetLogger())
+	// 错误恢复
+	r.Use(kin.Recovery())
+	// 托管静态资源目录
+	r.Static("/public", "./assets")
+
+	// Get 路由注册
+	r.Get("/", func(context *kin.Context) {
+		arr := []int{1, 2,3 ,4}
+		context.String(http.StatusOK, "%v", arr[10])
+	})
+
+	r.Get("/users", func(context *kin.Context) {
+		context.Html(http.StatusOK, "<div>users list</div>")
+	})
+
+	r.Get("/person", func(context *kin.Context){
+		context.Json(http.StatusOK, &Mock{
+			Name: "lily",
+			Age: 22,
+		})
+	})
+
+	r.Post("/post", func(context *kin.Context) {
+		data := context.PostValue("name")
+		fmt.Printf("%+v", data)
+		j, _ := json.Marshal(data)
+		context.Json(http.StatusOK, string(j))
+	})
+
+	// 应用路由组
+	userGroup := r.Group("/user")
+	userGroup.Get("/:name/detail", func(context *kin.Context) {
+		context.Html(http.StatusOK, fmt.Sprintf("<span>name is %s</span>", context.Params))
+	})
+	userGroup.Get("/:name/transaction", func(context *kin.Context) {
+		context.Html(http.StatusOK, "<span>html transaction response</span>")
+	})
+
+	// 指定端口运行
+	r.Run("8082")
 }
 ```
